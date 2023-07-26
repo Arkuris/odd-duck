@@ -1,15 +1,16 @@
 'use strict';
 
-const products = [];
+const products = load();
 const image1Element = document.getElementById('image1');
 const image2Element = document.getElementById('image2');
 const image3Element = document.getElementById('image3');
 const productContainer = document.getElementById('product-container');
 const resultButton = document.getElementById('resultButton');
 const canvasChart = document.getElementById('myChart');
+let maxClicksAllowed = 25;
 let rounds = 25;
 let clicks = 0;
-let maxClicksAllowed = 25;
+
 
 const state = {
   allProductsArray: [],
@@ -22,7 +23,7 @@ function Product(name, src) {
   this.src = src;
   this.timesClicked = 0;
   this.timesSeen = 0;
-  products.push(this);
+  // products.push(this);
 }
 
 new Product('bag', 'img/bag.jpg');
@@ -55,13 +56,20 @@ function displayRandomProducts() {
   let randomProductIndex2 = getRandomProductIndex();
   let randomProductIndex3 = getRandomProductIndex();
   // Checking to make sure index values are not duplicated.
+  // while (!lastImage.includes(products[randomProductIndex1]) &&
+  // !lastImages.includes(products[randomProductIndex2]) &&
+  // !lastImage.includes(products[randomProductIndex3]))
   while (randomProductIndex1 === randomProductIndex2) {
     randomProductIndex2 = getRandomProductIndex();
   }
   while (randomProductIndex2 === randomProductIndex3 ||
      randomProductIndex1 === randomProductIndex3) {
     randomProductIndex3 = getRandomProductIndex();
-  }
+  } 
+ 
+  // lastImages[0] = (products[randomProductIndex1]);
+  // lastImages[1] = (products[randomProductIndex2]);
+  // lastImages[2] = (products[randomProductIndex3]);
 
   image1Element.src = products[randomProductIndex1].src;
   image1Element.alt = products[randomProductIndex1].name;
@@ -93,6 +101,7 @@ function handleProductClicks(event) {
       renderChart();
     } else {
       displayRandomProducts();
+      save();
     }
   }
 }
@@ -140,39 +149,23 @@ function renderChart() {
   let productLikes = [];
   let productViews = [];
 
-  for (let i = 0; i < state.allProductsArray.length; i++) {
-    productNames.push(state.allProductsArray[i].name);
-    productLikes.push(state.allProductssArray[i].timesClicked);
-    productViews.push(state.allProductsArray[i].timesSeen);
+  for (let i = 0; i < products.length; i++) {
+    productNames.push(products[i].name);
+    productLikes.push(products[i].timesClicked);
+    productViews.push(products[i].timesSeen);
   }
-
-  /* refer to Chart.js > Chart Types > Bar Chart: 
-  https://www.chartjs.org/docs/latest/charts/bar.html 
-  and refer to Chart.js > Getting Started > Getting Started:
-  https://www.chartjs.org/docs/latest/getting-started/ */
-  return new Chart (canvasChart, {
+  console.log(productNames, productLikes, productViews);
+  return new Chart(canvasChart, {
     type: 'bar',
     data: {
       labels: productNames,
       datasets: [{
-        label: 'Likes',
-        data: productLikes,
-        backgroundColor: [
-          'rgba(255, 99, 132, 0.2)'
-        ],
-        borderColor: [
-          'rgb(255, 99, 132)'
-        ],
-        borderWidth: 1
-      }, {
         label: 'Views',
         data: productViews,
-        backgroundColor: [
-          'rgba(255, 159, 64, 0.2)'
-        ],
-        borderColor: [
-          'rgb(255, 159, 64)'
-        ],
+        borderWidth: 1
+      }, {
+        label: 'Likes',
+        data: productLikes,
         borderWidth: 1
       }]
     },
@@ -182,8 +175,48 @@ function renderChart() {
           beginAtZero: true
         }
       }
-    } 
+    }
   });
+}
+
+function save() {
+  let valuesToStore = JSON.stringify(products);
+  localStorage.setItem('chartData', valuesToStore);
+  console.log(localStorage.chartData);
+}
+
+function load() {
+  let rawData = localStorage.getItem('chartData');
+  let chartObject = JSON.parse(rawData);
+  // if we need Contructor functionality -> loop and recreate our Goat Objects;
+  if (!chartObject) {
+    return [
+      new Product('bag', 'img/bag.jpg'),
+      new Product('banana', 'img/banana.jpg'),
+      new Product('bathroom', 'img/bathroom.jpg'),
+      new Product('boots', 'img/boots.jpg'),
+      new Product('breakfast', 'img/breakfast.jpg'),
+      new Product('bubblegum', 'img/bubblegum.jpg'),
+      new Product('chair', 'img/chair.jpg'),
+      new Product('cthulhu', 'img/cthulhu.jpg'),
+      new Product('dog-duck', 'img/dog-duck.jpg'),
+      new Product('dragon', 'img/dragon.jpg'),
+      new Product('pen', 'img/pen.jpg'),
+      new Product('pet-sweep', 'img/pet-sweep.jpg'),
+      new Product('scissors', 'img/scissors.jpg'),
+      new Product('shark', 'img/shark.jpg'),
+      new Product('sweep', 'img/sweep.png'),
+      new Product('tauntaun', 'img/tauntaun.jpg'),
+      new Product('unicorn', 'img/unicorn.jpg'),
+      new Product('water can', 'img/water-can.jpg'),
+      new Product('wine-glass', 'img/wine-glass.jpg'),
+    ];
+  } else {
+    console.log('RECREATE PRODUCTS');
+
+    // loops through chartObject, for each goat in chartObject create a new Goat
+  }
+  return chartObject;
 }
 
 
