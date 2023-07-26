@@ -6,7 +6,16 @@ const image2Element = document.getElementById('image2');
 const image3Element = document.getElementById('image3');
 const productContainer = document.getElementById('product-container');
 const resultButton = document.getElementById('resultButton');
+const canvasChart = document.getElementById('myChart');
 let rounds = 25;
+let clicks = 0;
+let maxClicksAllowed = 25;
+
+const state = {
+  allProductsArray: [],
+  indexArray: [],
+};
+
 
 function Product(name, src) {
   this.name = name;
@@ -30,7 +39,7 @@ new Product('pen', 'img/pen.jpg');
 new Product('pet-sweep', 'img/pet-sweep.jpg');
 new Product('scissors', 'img/scissors.jpg');
 new Product('shark', 'img/shark.jpg');
-new Product('sweep', 'img/sweep.jpg');
+new Product('sweep', 'img/sweep.png');
 new Product('tauntaun', 'img/tauntaun.jpg');
 new Product('unicorn', 'img/unicorn.jpg');
 new Product('water can', 'img/water-can.jpg');
@@ -45,7 +54,7 @@ function displayRandomProducts() {
   let randomProductIndex1 = getRandomProductIndex();
   let randomProductIndex2 = getRandomProductIndex();
   let randomProductIndex3 = getRandomProductIndex();
-// Checking to make sure index values are not duplicated.
+  // Checking to make sure index values are not duplicated.
   while (randomProductIndex1 === randomProductIndex2) {
     randomProductIndex2 = getRandomProductIndex();
   }
@@ -78,39 +87,103 @@ function handleProductClicks(event) {
         break;
       }
     }
-    console.log(products);
-    // add 3 new images once clicked
-    displayRandomProducts();
-    rounds--;
-  } else {
-    alert('No more votes.');
-    productContainer.removeEventListener('click', handleProductClicks);
+    if (clicks === maxClicksAllowed) {
+      productContainer.removeEventListener('click', handleProductClicks);
+      productContainer.className = 'no-voting';
+      renderChart();
+    } else {
+      displayRandomProducts();
+    }
   }
 }
+
+//     console.log(products);
+//     // add 3 new images once clicked
+//     displayRandomProducts();
+//     rounds--;
+//   } else {
+//     alert('No more votes.');
+//     productContainer.removeEventListener('click', handleProductClicks);
+//   }
+// }
+
 
 function getRandomProductIndex() {
   return Math.floor(Math.random() * products.length);
 }
 
-function renderResults() {
-  let ul = document.querySelector('ul');
-  for (let i = 0; i < products.length; i++) {
-    let li = document.createElement('li');
-    li.textContent = `${products[i].name} had ${products[i].timesSeen} view(s) and was clicked ${products[i].timesClicked} time(s).`;
-    ul.appendChild(li);
-  }
-}
-
-resultButton.addEventListener('click', renderResults);
-productContainer.addEventListener('click', handleProductClicks);
-
-
 // function renderResults() {
-//   let lis = document.querySelectorAll('li'){
-//     if (lis.length)
-//   }   for (let i = 0; i < products.length; i++) {
+//   let ul = document.querySelector('ul');
+//   let lis = document.querySelectorAll('li');
+//   if (lis.length) {
+//     console.log('WE ALREADY HAVE A LIST!!!');
+//     // we know there are list items on the page.
+
+//     // update the existing lis.
+//   }
+//   for (let i = 0; i < products.length; i++) {
 //     let li = document.createElement('li');
 //     li.textContent = `${products[i].name} had ${products[i].timesSeen} view(s) and was clicked ${products[i].timesClicked} time(s).`;
 //     ul.appendChild(li);
 //   }
 // }
+
+resultButton.addEventListener('click', () => {
+  // renderResults();
+  renderChart();
+});
+// resultButton.addEventListener('click', renderResults);
+productContainer.addEventListener('click', handleProductClicks);
+
+function renderChart() {
+  let productNames = [];
+  let productLikes = [];
+  let productViews = [];
+
+  for (let i = 0; i < state.allProductsArray.length; i++) {
+    productNames.push(state.allProductsArray[i].name);
+    productLikes.push(state.allProductssArray[i].timesClicked);
+    productViews.push(state.allProductsArray[i].timesSeen);
+  }
+
+  /* refer to Chart.js > Chart Types > Bar Chart: 
+  https://www.chartjs.org/docs/latest/charts/bar.html 
+  and refer to Chart.js > Getting Started > Getting Started:
+  https://www.chartjs.org/docs/latest/getting-started/ */
+  return new Chart (canvasChart, {
+    type: 'bar',
+    data: {
+      labels: productNames,
+      datasets: [{
+        label: 'Likes',
+        data: productLikes,
+        backgroundColor: [
+          'rgba(255, 99, 132, 0.2)'
+        ],
+        borderColor: [
+          'rgb(255, 99, 132)'
+        ],
+        borderWidth: 1
+      }, {
+        label: 'Views',
+        data: productViews,
+        backgroundColor: [
+          'rgba(255, 159, 64, 0.2)'
+        ],
+        borderColor: [
+          'rgb(255, 159, 64)'
+        ],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    } 
+  });
+}
+
+
