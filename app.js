@@ -92,13 +92,16 @@ function handleProductClicks(event) {
     for (let i = 0; i < products.length; i++) {
       if (products[i].name === event.target.alt) {
         products[i].timesClicked++;
+        clicks++;
+        rounds--;
         break;
       }
     }
     if (clicks === maxClicksAllowed) {
       productContainer.removeEventListener('click', handleProductClicks);
       productContainer.className = 'no-voting';
-      renderChart();
+      alert('Max Votes Reached, Please press "View Results"');
+      // renderChart();
     } else {
       displayRandomProducts();
       save();
